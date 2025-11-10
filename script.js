@@ -77,8 +77,8 @@ async function fetchCurrencies() {
         console.log('Starting fetchCurrencies'); // Debug log
         showLoading();
         
-        // Add artificial delay to make loading more visible
-        await delay(2000);  // 2 second delay
+        // Add shorter delay to keep UI responsive while still showing loading state
+        await delay(800);  // 0.8 second delay
         
         // Check cache first
         const cachedCurrencies = getCachedData('currencies');
@@ -144,8 +144,8 @@ async function convertCurrency(e) {
         showLoading();
         console.log('Converting currency...');
         
-        // Add artificial delay to make loading more visible
-        await delay(2000);  // 2 second delay
+        // Add shorter delay to keep UI responsive
+        await delay(800);  // 0.8 second delay
 
         // Check cache for exchange rates
         const cacheKey = `rates_${fromCurrencyValue}`;

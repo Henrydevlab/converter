@@ -94,8 +94,23 @@ button:hover {
 
 /* Spinner animations */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% { 
+    transform: rotate(0deg);
+    border-width: 8px;
+  }
+  50% { 
+    border-width: 6px;
+  }
+  100% { 
+    transform: rotate(360deg);
+    border-width: 8px;
+  }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.8); }
+  100% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
 }
 
 @keyframes fadeIn {
@@ -111,7 +126,9 @@ button:hover {
   border: 8px solid var(--accent-primary);
   border-top: 8px solid #ffffff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: 
+    spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite,
+    pulse 2s ease-in-out infinite;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -119,7 +136,7 @@ button:hover {
   opacity: 1;
   transition: opacity 0.3s ease;
   background-color: var(--bg-input);
-  box-shadow: 0 0 15px rgba(59, 130, 246, 0.5);
+  transform-origin: center center;
 }
 
 .loading-spinner::before {
