@@ -27,7 +27,7 @@ function showLoading() {
     loadingSpinner.style.opacity = '1';
     loadingSpinner.style.visibility = 'visible';
     loadingSpinner.classList.remove('hidden');
-    errorMessage.classList.add('hidden');
+    clearError();
     resultDiv.textContent = '';
     console.log('Loading spinner element:', loadingSpinner); // Debug element
     console.log('Loading spinner classes:', loadingSpinner.className); // Debug classes
@@ -43,7 +43,13 @@ function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
     resultDiv.textContent = '';
+    amountInput.classList.add('error');
     console.log('Error shown:', message); // Debug log
+}
+
+function clearError() {
+    errorMessage.classList.add('hidden');
+    amountInput.classList.remove('error');
 }
 
 // Cache management functions
@@ -133,6 +139,7 @@ async function convertCurrency(e) {
     try {
         // Input validation
         const inputValue = amountInput.value.trim();
+        const hasSpecialChars = /[^0-9.]/.test(inputValue);
         const amount = parseFloat(inputValue);
         const fromCurrencyValue = fromCurrency.value;
         const toCurrencyValue = toCurrency.value;
@@ -140,6 +147,10 @@ async function convertCurrency(e) {
         // Comprehensive input validation
         if (inputValue === '') {
             showError("Please enter an amount to convert");
+            return;
+        }
+        if (hasSpecialChars) {
+            showError("Special characters or letters are not allowed");
             return;
         }
         if (isNaN(amount)) {
