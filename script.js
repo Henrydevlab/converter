@@ -132,12 +132,34 @@ async function convertCurrency(e) {
 
     try {
         // Input validation
-        const amount = parseFloat(amountInput.value);
+        const inputValue = amountInput.value.trim();
+        const amount = parseFloat(inputValue);
         const fromCurrencyValue = fromCurrency.value;
         const toCurrencyValue = toCurrency.value;
 
-        if (isNaN(amount) || amount < 0) {
-            showError("Please enter a valid positive number");
+        // Comprehensive input validation
+        if (inputValue === '') {
+            showError("Please enter an amount to convert");
+            return;
+        }
+        if (isNaN(amount)) {
+            showError("Please enter a valid number");
+            return;
+        }
+        if (amount < 0) {
+            showError("Amount cannot be negative");
+            return;
+        }
+        if (amount === 0) {
+            showError("Amount must be greater than zero");
+            return;
+        }
+        if (amount > 999999999) {
+            showError("Amount is too large. Please enter a smaller number");
+            return;
+        }
+        if (fromCurrencyValue === toCurrencyValue) {
+            showError("Please select different currencies to convert");
             return;
         }
 
