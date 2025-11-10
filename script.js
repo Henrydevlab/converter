@@ -18,16 +18,19 @@ function showLoading() {
     loadingSpinner.classList.remove('hidden');
     errorMessage.classList.add('hidden');
     resultDiv.textContent = '';
+    console.log('Loading spinner shown'); // Debug log
 }
 
 function hideLoading() {
     loadingSpinner.classList.add('hidden');
+    console.log('Loading spinner hidden'); // Debug log
 }
 
 function showError(message) {
     errorMessage.textContent = message;
     errorMessage.classList.remove('hidden');
     resultDiv.textContent = '';
+    console.log('Error shown:', message); // Debug log
 }
 
 // Cache management functions
@@ -53,11 +56,13 @@ function setCacheData(key, data) {
 
 async function fetchCurrencies() {
     try {
+        console.log('Starting fetchCurrencies'); // Debug log
         showLoading();
         
         // Check cache first
         const cachedCurrencies = getCachedData('currencies');
         if (cachedCurrencies) {
+            console.log('Using cached currencies'); // Debug log
             populateCurrencyDropdowns(cachedCurrencies);
             hideLoading();
             return;
