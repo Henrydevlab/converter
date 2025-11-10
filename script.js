@@ -240,18 +240,28 @@ async function convertCurrency(e) {
         // Add shorter delay to keep UI responsive
         await delay(800);  // 0.8 second delay
 
+        // First check if we're offline
+        if (!isOnline) {
+            console.log('Operating in offline mode');
+        }
+
         // Check cache for exchange rates
         const cacheKey = `rates_${fromCurrencyValue}`;
         const cachedRates = getCachedData(cacheKey);
         
         let rate;
         if (cachedRates && cachedRates[toCurrencyValue]) {
+            console.log('Using cached rates');
             rate = cachedRates[toCurrencyValue];
+            if (!isOnline) {
+                updateCacheStatus('Offline - Using cached rates', true);
+            }
         } else if (!isOnline) {
-            throw new Error('No internet connection and no cached rates available');
+            showError('No cached rates available for this currency pair. Please reconnect to the internet.');
+            return;
         } else {
             try {
-                // Fetch fresh rates if not in cache
+                // Fetch fresh rates if not in cache and we're online
                 const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrencyValue}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch exchange rates');
@@ -265,7 +275,8 @@ async function convertCurrency(e) {
                 updateCacheStatus('Rates updated just now', false);
             } catch (error) {
                 if (!isOnline) {
-                    throw new Error('Lost internet connection. Please try again when online.');
+                    showError('Lost internet connection. Using cached rates if available.');
+                    return;
                 }
                 throw error;
             }
@@ -275,8 +286,12 @@ async function convertCurrency(e) {
         resultDiv.textContent = `${amount.toLocaleString()} ${fromCurrencyValue} = ${parseFloat(convertedAmount).toLocaleString()} ${toCurrencyValue}`;
         
     } catch (error) {
-        showError('Failed to convert currency. Please try again later.');
         console.error('Conversion error:', error);
+        if (!isOnline) {
+            showError('You are offline. Please check your internet connection or use cached rates.');
+        } else {
+            showError('Failed to convert currency. Please try again later.');
+        }
     } finally {
         hideLoading();
     }
