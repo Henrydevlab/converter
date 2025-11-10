@@ -92,6 +92,11 @@ button:hover {
   color: var(--text-primary);
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .loading-spinner {
   width: 50px;
   height: 50px;
@@ -102,6 +107,7 @@ button:hover {
   animation: spin 1s linear infinite;
   display: block;
   position: relative;
+  visibility: visible;
 }
 
 .loading-spinner::after {
@@ -115,10 +121,6 @@ button:hover {
   white-space: nowrap;
 }
 
-.hidden {
-  display: none !important;
-}
-
 .error-message {
   margin-top: 20px;
   text-align: center;
@@ -127,10 +129,6 @@ button:hover {
 }
 
 .hidden {
-  display: none;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  display: none !important;
+  visibility: hidden !important;
 }

@@ -10,6 +10,13 @@ const errorMessage = document.getElementById("error-message");
 const CACHE_KEY = 'exchangeRateCache';
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
 
+// Clear any existing cache on page load for testing
+localStorage.clear();
+
+// Initialize UI
+loadingSpinner.classList.add('hidden');
+errorMessage.classList.add('hidden');
+
 window.addEventListener("load", fetchCurrencies);
 converterForm.addEventListener("submit", convertCurrency);
 
