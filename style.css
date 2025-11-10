@@ -5,6 +5,7 @@
 }
 
 :root {
+  /* Dark theme (default) */
   --bg-primary: #0f172a;
   --bg-secondary: #1e293b;
   --bg-input: #334155;
@@ -13,6 +14,66 @@
   --border-color: #475569;
   --accent-primary: #3b82f6;
   --accent-hover: #2563eb;
+}
+
+/* Light theme */
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-input: #f1f5f9;
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --border-color: #cbd5e1;
+  --accent-primary: #3b82f6;
+  --accent-hover: #2563eb;
+}
+
+/* Theme toggle styles */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 100;
+}
+
+#theme-switch {
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+#theme-switch:hover {
+  transform: scale(1.1);
+  border-color: var(--accent-primary);
+}
+
+.theme-icon {
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+[data-theme="light"] .theme-icon.light {
+  display: none;
+}
+
+[data-theme="light"] .theme-icon.dark {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon.light {
+  display: block;
+}
+
+[data-theme="dark"] .theme-icon.dark {
+  display: none;
 }
 
 body {

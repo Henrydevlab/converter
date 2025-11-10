@@ -48,6 +48,36 @@ function formatCurrency(amount, currencyCode) {
 // Clear any existing cache on page load for testing
 localStorage.clear();
 
+// Theme management
+const themeSwitch = document.getElementById('theme-switch');
+const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+// Load saved theme or use system preference
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+} else {
+    const systemTheme = prefersDarkScheme.matches ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', systemTheme);
+}
+
+// Theme toggle handler
+themeSwitch.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+});
+
+// Watch for system theme changes
+prefersDarkScheme.addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+        const systemTheme = e.matches ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', systemTheme);
+    }
+});
+
 // Initialize UI
 loadingSpinner.classList.add('hidden');
 errorMessage.classList.add('hidden');
