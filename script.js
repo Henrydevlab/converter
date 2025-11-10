@@ -67,10 +67,18 @@ function setCacheData(key, data) {
     localStorage.setItem(key, JSON.stringify(cacheData));
 }
 
+// Helper function to create a delay
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function fetchCurrencies() {
     try {
         console.log('Starting fetchCurrencies'); // Debug log
         showLoading();
+        
+        // Add artificial delay to make loading more visible
+        await delay(2000);  // 2 second delay
         
         // Check cache first
         const cachedCurrencies = getCachedData('currencies');
@@ -134,6 +142,10 @@ async function convertCurrency(e) {
         }
 
         showLoading();
+        console.log('Converting currency...');
+        
+        // Add artificial delay to make loading more visible
+        await delay(2000);  // 2 second delay
 
         // Check cache for exchange rates
         const cacheKey = `rates_${fromCurrencyValue}`;
