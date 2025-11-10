@@ -198,6 +198,35 @@ button:hover {
 }
 
 /* Hidden state */
+.cache-status {
+  margin-top: 15px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  background-color: var(--bg-input);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.cache-status.offline {
+  background-color: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.cache-status.cached {
+  background-color: rgba(59, 130, 246, 0.1);
+  color: var(--accent-primary);
+}
+
+.cache-icon {
+  font-size: 1rem;
+}
+
 .hidden {
   display: none !important;
   visibility: hidden !important;

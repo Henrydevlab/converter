@@ -5,10 +5,15 @@ const amountInput = document.getElementById("amount");
 const resultDiv = document.getElementById("result");
 const loadingSpinner = document.getElementById("loading");
 const errorMessage = document.getElementById("error-message");
+const cacheStatus = document.getElementById("cache-status");
+const cacheMessage = document.getElementById("cache-message");
 
 // Cache configuration
 const CACHE_KEY = 'exchangeRateCache';
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
+
+// Network status tracking
+let isOnline = navigator.onLine;
 
 // Clear any existing cache on page load for testing
 localStorage.clear();
@@ -39,6 +44,19 @@ amountInput.addEventListener('input', function(e) {
 window.addEventListener("load", fetchCurrencies);
 converterForm.addEventListener("submit", convertCurrency);
 
+// Network status handling
+window.addEventListener('online', function() {
+    isOnline = true;
+    updateCacheStatus('Online mode');
+    cacheStatus.classList.remove('offline');
+});
+
+window.addEventListener('offline', function() {
+    isOnline = false;
+    updateCacheStatus('Offline mode - Using cached rates');
+    cacheStatus.classList.add('offline');
+});
+
 // Helper functions for UI state
 function showLoading() {
     console.log('Showing loading spinner...'); // Debug log
@@ -50,6 +68,16 @@ function showLoading() {
     resultDiv.textContent = '';
     console.log('Loading spinner element:', loadingSpinner); // Debug element
     console.log('Loading spinner classes:', loadingSpinner.className); // Debug classes
+}
+
+function updateCacheStatus(message, isCached = false) {
+    cacheStatus.classList.remove('hidden');
+    cacheMessage.textContent = message;
+    if (isCached) {
+        cacheStatus.classList.add('cached');
+    } else {
+        cacheStatus.classList.remove('cached');
+    }
 }
 
 function hideLoading() {
@@ -77,10 +105,23 @@ function getCachedData(key) {
     if (!cached) return null;
 
     const { timestamp, data } = JSON.parse(cached);
-    if (Date.now() - timestamp > CACHE_DURATION) {
+    const age = Date.now() - timestamp;
+    
+    if (age > CACHE_DURATION) {
         localStorage.removeItem(key);
         return null;
     }
+
+    // Calculate time ago for display
+    const minutesAgo = Math.floor(age / 60000);
+    if (minutesAgo < 1) {
+        updateCacheStatus('Using live rates', false);
+    } else if (minutesAgo === 1) {
+        updateCacheStatus('Rates updated 1 minute ago', true);
+    } else {
+        updateCacheStatus(`Rates updated ${minutesAgo} minutes ago`, true);
+    }
+
     return data;
 }
 
@@ -206,18 +247,28 @@ async function convertCurrency(e) {
         let rate;
         if (cachedRates && cachedRates[toCurrencyValue]) {
             rate = cachedRates[toCurrencyValue];
+        } else if (!isOnline) {
+            throw new Error('No internet connection and no cached rates available');
         } else {
-            // Fetch fresh rates if not in cache
-            const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrencyValue}`);
-            if (!response.ok) {
-                throw new Error('Failed to fetch exchange rates');
+            try {
+                // Fetch fresh rates if not in cache
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrencyValue}`);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch exchange rates');
+                }
+
+                const data = await response.json();
+                rate = data.rates[toCurrencyValue];
+
+                // Cache the new rates
+                setCacheData(cacheKey, data.rates);
+                updateCacheStatus('Rates updated just now', false);
+            } catch (error) {
+                if (!isOnline) {
+                    throw new Error('Lost internet connection. Please try again when online.');
+                }
+                throw error;
             }
-
-            const data = await response.json();
-            rate = data.rates[toCurrencyValue];
-
-            // Cache the new rates
-            setCacheData(cacheKey, data.rates);
         }
 
         const convertedAmount = (amount * rate).toFixed(2);
