@@ -91,3 +91,29 @@ button:hover {
   font-size: 1.2rem;
   color: var(--text-primary);
 }
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 20px auto;
+  border: 4px solid var(--bg-input);
+  border-top: 4px solid var(--accent-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.error-message {
+  margin-top: 20px;
+  text-align: center;
+  color: #ef4444;
+  font-size: 0.9rem;
+}
+
+.hidden {
+  display: none;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

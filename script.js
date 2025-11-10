@@ -3,49 +3,148 @@ const fromCurrency = document.getElementById("from-currency");
 const toCurrency = document.getElementById("to-currency");
 const amountInput = document.getElementById("amount");
 const resultDiv = document.getElementById("result");
+const loadingSpinner = document.getElementById("loading");
+const errorMessage = document.getElementById("error-message");
+
+// Cache configuration
+const CACHE_KEY = 'exchangeRateCache';
+const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
 
 window.addEventListener("load", fetchCurrencies);
-
 converterForm.addEventListener("submit", convertCurrency);
 
+// Helper functions for UI state
+function showLoading() {
+    loadingSpinner.classList.remove('hidden');
+    errorMessage.classList.add('hidden');
+    resultDiv.textContent = '';
+}
+
+function hideLoading() {
+    loadingSpinner.classList.add('hidden');
+}
+
+function showError(message) {
+    errorMessage.textContent = message;
+    errorMessage.classList.remove('hidden');
+    resultDiv.textContent = '';
+}
+
+// Cache management functions
+function getCachedData(key) {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+
+    const { timestamp, data } = JSON.parse(cached);
+    if (Date.now() - timestamp > CACHE_DURATION) {
+        localStorage.removeItem(key);
+        return null;
+    }
+    return data;
+}
+
+function setCacheData(key, data) {
+    const cacheData = {
+        timestamp: Date.now(),
+        data: data
+    };
+    localStorage.setItem(key, JSON.stringify(cacheData));
+}
+
 async function fetchCurrencies() {
-  // https://api.exchangerate-api.com/v4/latest/USD
-  const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
-  const data = await response.json();
+    try {
+        showLoading();
+        
+        // Check cache first
+        const cachedCurrencies = getCachedData('currencies');
+        if (cachedCurrencies) {
+            populateCurrencyDropdowns(cachedCurrencies);
+            hideLoading();
+            return;
+        }
 
-  console.log(data);
-  const currencyOptions = Object.keys(data.rates);
+        const response = await fetch("https://api.exchangerate-api.com/v4/latest/USD");
+        if (!response.ok) {
+            throw new Error('Failed to fetch currencies');
+        }
 
-  currencyOptions.forEach((currency) => {
-    const option1 = document.createElement("option");
-    option1.value = currency;
-    option1.textContent = currency;
-    fromCurrency.appendChild(option1);
+        const data = await response.json();
+        const currencyOptions = Object.keys(data.rates);
+        
+        // Cache the currencies
+        setCacheData('currencies', currencyOptions);
+        
+        populateCurrencyDropdowns(currencyOptions);
+    } catch (error) {
+        showError('Failed to load currencies. Please try again later.');
+        console.error('Currency fetch error:', error);
+    } finally {
+        hideLoading();
+    }
+}
 
-    const option2 = document.createElement("option");
-    option2.value = currency;
-    option2.textContent = currency;
-    toCurrency.appendChild(option2);
-  });
+function populateCurrencyDropdowns(currencies) {
+    // Clear existing options
+    fromCurrency.innerHTML = '';
+    toCurrency.innerHTML = '';
+
+    currencies.forEach((currency) => {
+        const option1 = document.createElement("option");
+        option1.value = currency;
+        option1.textContent = currency;
+        fromCurrency.appendChild(option1);
+
+        const option2 = document.createElement("option");
+        option2.value = currency;
+        option2.textContent = currency;
+        toCurrency.appendChild(option2);
+    });
 }
 
 async function convertCurrency(e) {
-  e.preventDefault();
+    e.preventDefault();
 
-  const amount = parseFloat(amountInput.value);
-  const fromCurrencyValue = fromCurrency.value;
-  const toCurrencyValue = toCurrency.value;
+    try {
+        // Input validation
+        const amount = parseFloat(amountInput.value);
+        const fromCurrencyValue = fromCurrency.value;
+        const toCurrencyValue = toCurrency.value;
 
-  if (amount < 0) {
-    alert("Please enter a valid amount");
-    return;
-  }
+        if (isNaN(amount) || amount < 0) {
+            showError("Please enter a valid positive number");
+            return;
+        }
 
-  const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrencyValue}`);
-  const data = await response.json();
+        showLoading();
 
-  const rate = data.rates[toCurrencyValue];
-  const convertedAmount = (amount * rate).toFixed(2);
+        // Check cache for exchange rates
+        const cacheKey = `rates_${fromCurrencyValue}`;
+        const cachedRates = getCachedData(cacheKey);
+        
+        let rate;
+        if (cachedRates && cachedRates[toCurrencyValue]) {
+            rate = cachedRates[toCurrencyValue];
+        } else {
+            // Fetch fresh rates if not in cache
+            const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrencyValue}`);
+            if (!response.ok) {
+                throw new Error('Failed to fetch exchange rates');
+            }
 
-  resultDiv.textContent = `${amount} ${fromCurrencyValue} = ${convertedAmount} ${toCurrencyValue}`;
+            const data = await response.json();
+            rate = data.rates[toCurrencyValue];
+
+            // Cache the new rates
+            setCacheData(cacheKey, data.rates);
+        }
+
+        const convertedAmount = (amount * rate).toFixed(2);
+        resultDiv.textContent = `${amount.toLocaleString()} ${fromCurrencyValue} = ${parseFloat(convertedAmount).toLocaleString()} ${toCurrencyValue}`;
+        
+    } catch (error) {
+        showError('Failed to convert currency. Please try again later.');
+        console.error('Conversion error:', error);
+    } finally {
+        hideLoading();
+    }
 }
