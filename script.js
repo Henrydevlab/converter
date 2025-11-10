@@ -12,8 +12,38 @@ const cacheMessage = document.getElementById("cache-message");
 const CACHE_KEY = 'exchangeRateCache';
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
 
+// Currency formatting configuration
+const CURRENCY_FORMATS = {
+    USD: { locale: 'en-US', currency: 'USD', decimals: 2 },
+    EUR: { locale: 'de-DE', currency: 'EUR', decimals: 2 },
+    JPY: { locale: 'ja-JP', currency: 'JPY', decimals: 0 },
+    GBP: { locale: 'en-GB', currency: 'GBP', decimals: 2 },
+    CNY: { locale: 'zh-CN', currency: 'CNY', decimals: 2 },
+    // Default format for other currencies
+    DEFAULT: { locale: 'en-US', decimals: 2 }
+};
+
 // Network status tracking
 let isOnline = navigator.onLine;
+
+// Helper function for currency formatting
+function formatCurrency(amount, currencyCode) {
+    const format = CURRENCY_FORMATS[currencyCode] || CURRENCY_FORMATS.DEFAULT;
+    
+    try {
+        // Try to use Intl formatter first
+        return new Intl.NumberFormat(format.locale, {
+            style: 'currency',
+            currency: currencyCode,
+            minimumFractionDigits: format.decimals,
+            maximumFractionDigits: format.decimals
+        }).format(amount);
+    } catch (error) {
+        // Fallback formatting
+        const formatted = amount.toFixed(format.decimals);
+        return `${currencyCode} ${formatted}`;
+    }
+}
 
 // Clear any existing cache on page load for testing
 localStorage.clear();
@@ -273,6 +303,20 @@ async function convertCurrency(e) {
                 // Cache the new rates
                 setCacheData(cacheKey, data.rates);
                 updateCacheStatus('Rates updated just now', false);
+
+                // Format both amounts with proper currency formatting
+                const convertedAmount = amount * rate;
+                const formattedOriginal = formatCurrency(amount, fromCurrencyValue);
+                const formattedConverted = formatCurrency(convertedAmount, toCurrencyValue);
+                
+                // Create and style the result display
+                resultDiv.innerHTML = `
+                    <div class="conversion-result">
+                        <div class="amount-display">${formattedOriginal}</div>
+                        <div class="equals">=</div>
+                        <div class="amount-display highlight">${formattedConverted}</div>
+                    </div>
+                `;
             } catch (error) {
                 if (!isOnline) {
                     showError('Lost internet connection. Using cached rates if available.');
