@@ -17,6 +17,25 @@ localStorage.clear();
 loadingSpinner.classList.add('hidden');
 errorMessage.classList.add('hidden');
 
+// Real-time input validation
+amountInput.addEventListener('input', function(e) {
+    const value = e.target.value;
+    if (value === '') {
+        clearError();
+        return;
+    }
+    
+    if (/[^0-9.]/.test(value)) {
+        showError("Please enter numbers only");
+        e.target.value = value.replace(/[^0-9.]/g, '');
+    } else if ((value.match(/\./g) || []).length > 1) {
+        showError("Please enter a valid number");
+        e.target.value = value.substring(0, value.lastIndexOf('.'));
+    } else {
+        clearError();
+    }
+});
+
 window.addEventListener("load", fetchCurrencies);
 converterForm.addEventListener("submit", convertCurrency);
 
