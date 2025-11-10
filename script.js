@@ -22,15 +22,21 @@ converterForm.addEventListener("submit", convertCurrency);
 
 // Helper functions for UI state
 function showLoading() {
+    console.log('Showing loading spinner...'); // Debug log
+    loadingSpinner.style.display = 'flex';
+    loadingSpinner.style.opacity = '1';
+    loadingSpinner.style.visibility = 'visible';
     loadingSpinner.classList.remove('hidden');
     errorMessage.classList.add('hidden');
     resultDiv.textContent = '';
-    console.log('Loading spinner shown'); // Debug log
+    console.log('Loading spinner element:', loadingSpinner); // Debug element
+    console.log('Loading spinner classes:', loadingSpinner.className); // Debug classes
 }
 
 function hideLoading() {
+    console.log('Hiding loading spinner...'); // Debug log
     loadingSpinner.classList.add('hidden');
-    console.log('Loading spinner hidden'); // Debug log
+    console.log('Loading spinner classes after hide:', loadingSpinner.className); // Debug classes
 }
 
 function showError(message) {
