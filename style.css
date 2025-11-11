@@ -222,6 +222,22 @@ button:hover {
   margin: 5px 0;
 }
 
+.details-toggle {
+  background: transparent;
+  border: none;
+  color: var(--accent-primary);
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.rate-details {
+  margin-top: 8px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  text-align: left;
+}
+
 /* Spinner animations */
 @keyframes spin {
   0% { 

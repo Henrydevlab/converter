@@ -278,6 +278,13 @@ function getCachedData(key) {
     return data;
 }
 
+// Return full cached entry (timestamp + data)
+function getCachedEntry(key) {
+    const cached = localStorage.getItem(key);
+    if (!cached) return null;
+    return JSON.parse(cached); // { timestamp, data }
+}
+
 function setCacheData(key, data) {
     const cacheData = {
         timestamp: Date.now(),
@@ -400,12 +407,20 @@ async function convertCurrency(e) {
 
         // Check cache for exchange rates
         const cacheKey = `rates_${fromCurrencyValue}`;
-        const cachedRates = getCachedData(cacheKey);
+        const cachedEntry = getCachedEntry(cacheKey); // { timestamp, data }
+        const cachedRates = cachedEntry ? cachedEntry.data : null;
         
         let rate;
+        let fetchedAt = new Date().toLocaleString();
+        let source = 'live';
+
         if (cachedRates && cachedRates[toCurrencyValue]) {
             console.log('Using cached rates');
             rate = cachedRates[toCurrencyValue];
+            source = 'cache';
+            if (cachedEntry && cachedEntry.timestamp) {
+                fetchedAt = new Date(cachedEntry.timestamp).toLocaleString();
+            }
             if (!isOnline) {
                 updateCacheStatus('Offline - Using cached rates', true);
             }
@@ -417,6 +432,8 @@ async function convertCurrency(e) {
             for (let item of history) {
                 if (item.fromCurrency === fromCurrencyValue && item.toCurrency === toCurrencyValue) {
                     rate = item.result / item.amount;
+                    fetchedAt = item.timestamp || fetchedAt;
+                    source = 'history';
                     foundInHistory = true;
                     console.log('Using conversion rate from history');
                     updateCacheStatus('Offline - Using rate from history', true);
@@ -442,23 +459,8 @@ async function convertCurrency(e) {
                 // Cache the new rates
                 setCacheData(cacheKey, data.rates);
                 updateCacheStatus('Rates updated just now', false);
-
-                // Format both amounts with proper currency formatting
-                const convertedAmount = amount * rate;
-                const formattedOriginal = formatCurrency(amount, fromCurrencyValue);
-                const formattedConverted = formatCurrency(convertedAmount, toCurrencyValue);
-                
-                // Create and style the result display
-                resultDiv.innerHTML = `
-                    <div class="conversion-result">
-                        <div class="amount-display">${formattedOriginal}</div>
-                        <div class="equals">=</div>
-                        <div class="amount-display highlight">${formattedConverted}</div>
-                    </div>
-                `;
-                
-                // Add to history
-                addToHistory(amount, fromCurrencyValue, toCurrencyValue, convertedAmount);
+                fetchedAt = new Date().toLocaleString();
+                source = 'api';
             } catch (error) {
                 if (!isOnline) {
                     showError('Lost internet connection. Using cached rates if available.');
@@ -468,8 +470,39 @@ async function convertCurrency(e) {
             }
         }
 
-        const convertedAmount = (amount * rate).toFixed(2);
-        resultDiv.textContent = `${amount.toLocaleString()} ${fromCurrencyValue} = ${parseFloat(convertedAmount).toLocaleString()} ${toCurrencyValue}`;
+        // Build and show result with details toggle
+        const converted = amount * rate;
+        const formattedOriginal = formatCurrency(amount, fromCurrencyValue);
+        const formattedConverted = formatCurrency(converted, toCurrencyValue);
+        const rawRateStr = Number(rate).toFixed(6);
+
+        resultDiv.innerHTML = `
+            <div class="conversion-result">
+                <div class="amount-display">${formattedOriginal}</div>
+                <div class="equals">=</div>
+                <div class="amount-display highlight">${formattedConverted}</div>
+                <button class="details-toggle" aria-expanded="false">Details</button>
+                <div class="rate-details hidden">
+                    <div>Raw rate: <strong>${rawRateStr}</strong></div>
+                    <div>Source: <strong>${source}</strong></div>
+                    <div>Fetched: <strong>${fetchedAt}</strong></div>
+                </div>
+            </div>
+        `;
+
+        // Attach toggle handler
+        const detailsBtn = resultDiv.querySelector('.details-toggle');
+        const detailsDiv = resultDiv.querySelector('.rate-details');
+        if (detailsBtn && detailsDiv) {
+            detailsBtn.addEventListener('click', () => {
+                const expanded = detailsBtn.getAttribute('aria-expanded') === 'true';
+                detailsBtn.setAttribute('aria-expanded', String(!expanded));
+                detailsDiv.classList.toggle('hidden');
+            });
+        }
+
+        // Save the conversion to history (helpful for offline fallback)
+        addToHistory(amount, fromCurrencyValue, toCurrencyValue, converted);
         
     } catch (error) {
         console.error('Conversion error:', error);
