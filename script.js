@@ -11,6 +11,8 @@ const cacheMessage = document.getElementById("cache-message");
 // Cache configuration
 const CACHE_KEY = 'exchangeRateCache';
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
+const HISTORY_KEY = 'conversionHistory';
+const MAX_HISTORY_ITEMS = 5;
 
 // Currency formatting configuration
 const CURRENCY_FORMATS = {
@@ -43,6 +45,69 @@ function formatCurrency(amount, currencyCode) {
         const formatted = amount.toFixed(format.decimals);
         return `${currencyCode} ${formatted}`;
     }
+}
+
+// History management functions
+function addToHistory(amount, fromCurrency, toCurrency, result) {
+    let history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    
+    const newEntry = {
+        id: Date.now(),
+        amount,
+        fromCurrency,
+        toCurrency,
+        result,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    
+    // Add to beginning of array
+    history.unshift(newEntry);
+    
+    // Keep only the most recent items
+    history = history.slice(0, MAX_HISTORY_ITEMS);
+    
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    displayHistory();
+}
+
+function getHistory() {
+    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+}
+
+function clearHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    displayHistory();
+}
+
+function displayHistory() {
+    const historySection = document.getElementById('history-section');
+    const historyList = document.getElementById('history-list');
+    const history = getHistory();
+    
+    if (history.length === 0) {
+        historySection.classList.add('hidden');
+        return;
+    }
+    
+    historySection.classList.remove('hidden');
+    historyList.innerHTML = history.map(item => `
+        <div class="history-item" onclick="repeatConversion(${item.amount}, '${item.fromCurrency}', '${item.toCurrency}')">
+            <span class="history-item-text">${item.amount} ${item.fromCurrency} → ${item.toCurrency}</span>
+            <span class="history-item-time">${item.timestamp}</span>
+        </div>
+    `).join('');
+}
+
+function repeatConversion(amount, fromCurrency, toCurrency) {
+    amountInput.value = amount;
+    fromCurrency === fromCurrency ? null : (fromCurrency = fromCurrency);
+    toCurrency === toCurrency ? null : (toCurrency = toCurrency);
+    
+    // Set the currency values
+    let fromSelect = document.getElementById('from-currency');
+    let toSelect = document.getElementById('to-currency');
+    fromSelect.value = fromCurrency;
+    toSelect.value = toCurrency;
 }
 
 // Clear any existing cache on page load for testing
@@ -82,6 +147,9 @@ prefersDarkScheme.addEventListener('change', (e) => {
 loadingSpinner.classList.add('hidden');
 errorMessage.classList.add('hidden');
 
+// Display any existing history
+displayHistory();
+
 // Real-time input validation
 amountInput.addEventListener('input', function(e) {
     const value = e.target.value;
@@ -103,6 +171,9 @@ amountInput.addEventListener('input', function(e) {
 
 window.addEventListener("load", fetchCurrencies);
 converterForm.addEventListener("submit", convertCurrency);
+
+// Clear history button
+document.getElementById('clear-history').addEventListener('click', clearHistory);
 
 // Network status handling
 window.addEventListener('online', function() {
@@ -347,6 +418,9 @@ async function convertCurrency(e) {
                         <div class="amount-display highlight">${formattedConverted}</div>
                     </div>
                 `;
+                
+                // Add to history
+                addToHistory(amount, fromCurrencyValue, toCurrencyValue, convertedAmount);
             } catch (error) {
                 if (!isOnline) {
                     showError('Lost internet connection. Using cached rates if available.');
