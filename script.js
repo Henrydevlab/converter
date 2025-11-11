@@ -478,11 +478,10 @@ async function convertCurrency(e) {
 
         resultDiv.innerHTML = `
             <div class="conversion-result">
-                <div class="amount-display">${formattedOriginal}</div>
-                <div class="equals">=</div>
                 <div class="amount-display highlight">${formattedConverted}</div>
                 <button class="details-toggle" aria-expanded="false">Details</button>
                 <div class="rate-details hidden">
+                    <div>Original: <strong>${formattedOriginal}</strong></div>
                     <div>Raw rate: <strong>${rawRateStr}</strong></div>
                     <div>Source: <strong>${source}</strong></div>
                     <div>Fetched: <strong>${fetchedAt}</strong></div>
