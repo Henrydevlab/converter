@@ -67,15 +67,19 @@ function addToHistory(amount, fromCurrency, toCurrency, result) {
     history = history.slice(0, MAX_HISTORY_ITEMS);
     
     localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    console.log('Added to history. Total items:', history.length); // Debug
     displayHistory();
 }
 
 function getHistory() {
-    return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    console.log('Retrieved history:', history); // Debug
+    return history;
 }
 
 function clearHistory() {
     localStorage.removeItem(HISTORY_KEY);
+    console.log('History cleared'); // Debug
     displayHistory();
 }
 
@@ -84,8 +88,11 @@ function displayHistory() {
     const historyList = document.getElementById('history-list');
     const history = getHistory();
     
+    console.log('Displaying history with', history.length, 'items'); // Debug
+    
     if (history.length === 0) {
         historySection.classList.add('hidden');
+        console.log('History section hidden'); // Debug
         return;
     }
     
@@ -96,22 +103,20 @@ function displayHistory() {
             <span class="history-item-time">${item.timestamp}</span>
         </div>
     `).join('');
+    console.log('History list updated with', history.length, 'items'); // Debug
 }
 
-function repeatConversion(amount, fromCurrency, toCurrency) {
+function repeatConversion(amount, fromCurr, toCurr) {
     amountInput.value = amount;
-    fromCurrency === fromCurrency ? null : (fromCurrency = fromCurrency);
-    toCurrency === toCurrency ? null : (toCurrency = toCurrency);
     
     // Set the currency values
     let fromSelect = document.getElementById('from-currency');
     let toSelect = document.getElementById('to-currency');
-    fromSelect.value = fromCurrency;
-    toSelect.value = toCurrency;
+    fromSelect.value = fromCurr;
+    toSelect.value = toCurr;
+    
+    console.log('Repeated conversion:', amount, fromCurr, toCurr); // Debug
 }
-
-// Clear any existing cache on page load for testing
-localStorage.clear();
 
 // Theme management
 const themeSwitch = document.getElementById('theme-switch');
