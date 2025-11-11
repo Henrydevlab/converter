@@ -223,12 +223,16 @@ button:hover {
 }
 
 .details-toggle {
-  background: transparent;
-  border: none;
+  background: rgba(59,130,246,0.06);
+  border: 1px solid rgba(59,130,246,0.16);
   color: var(--accent-primary);
   cursor: pointer;
   font-size: 0.85rem;
   margin-top: 8px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  display: inline-block;
 }
 
 .rate-details {
@@ -236,6 +240,12 @@ button:hover {
   font-size: 0.85rem;
   color: var(--text-secondary);
   text-align: left;
+}
+
+.details-toggle.hint {
+  animation: pulse 1.2s ease-in-out 0s 2;
+  box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+  transform: translateY(-2px);
 }
 
 /* Spinner animations */

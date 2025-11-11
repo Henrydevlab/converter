@@ -494,11 +494,41 @@ async function convertCurrency(e) {
         const detailsBtn = resultDiv.querySelector('.details-toggle');
         const detailsDiv = resultDiv.querySelector('.rate-details');
         if (detailsBtn && detailsDiv) {
-            detailsBtn.addEventListener('click', () => {
+            // Ensure ARIA and initial state
+            detailsBtn.setAttribute('aria-expanded', 'false');
+            detailsDiv.setAttribute('aria-hidden', 'true');
+
+            const toggleFn = () => {
                 const expanded = detailsBtn.getAttribute('aria-expanded') === 'true';
                 detailsBtn.setAttribute('aria-expanded', String(!expanded));
                 detailsDiv.classList.toggle('hidden');
-            });
+                detailsDiv.setAttribute('aria-hidden', String(expanded));
+                detailsBtn.textContent = expanded ? 'Details' : 'Hide details';
+            };
+
+            detailsBtn.addEventListener('click', toggleFn);
+
+            // UX: auto-open the details on first successful conversion so users discover it
+            try {
+                const seen = localStorage.getItem('detailsSeen');
+                if (!seen) {
+                    // briefly add a visual hint class then open
+                    detailsBtn.classList.add('hint');
+                    // open after a short delay so the user can see the result first
+                    setTimeout(() => {
+                        // open details
+                        if (detailsDiv.classList.contains('hidden')) {
+                            toggleFn();
+                        }
+                        // remove the hint class shortly after
+                        setTimeout(() => detailsBtn.classList.remove('hint'), 1200);
+                        localStorage.setItem('detailsSeen', '1');
+                    }, 450);
+                }
+            } catch (err) {
+                // ignore storage errors
+                console.warn('Could not access localStorage for detailsSeen', err);
+            }
         }
 
         // Save the conversion to history (helpful for offline fallback)
