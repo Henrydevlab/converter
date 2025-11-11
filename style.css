@@ -223,16 +223,17 @@ button:hover {
 }
 
 .details-toggle {
-  background: rgba(59,130,246,0.06);
-  border: 1px solid rgba(59,130,246,0.16);
-  color: var(--accent-primary);
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   cursor: pointer;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   margin-top: 8px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease, color 0.12s ease;
   display: inline-block;
+  font-weight: 600;
 }
 
 .rate-details {
@@ -244,8 +245,42 @@ button:hover {
 
 .details-toggle.hint {
   animation: pulse 1.2s ease-in-out 0s 2;
-  box-shadow: 0 6px 18px rgba(59,130,246,0.12);
+  box-shadow: 0 8px 24px rgba(59,130,246,0.16);
   transform: translateY(-2px);
+}
+
+/* Hover / focus states for accessibility */
+.details-toggle:hover,
+.details-toggle:focus {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Theme-specific tweaks for visibility */
+[data-theme="light"] .details-toggle {
+  background: #ffffff;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+[data-theme="light"] .details-toggle:hover,
+[data-theme="light"] .details-toggle:focus {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
+}
+
+[data-theme="dark"] .details-toggle {
+  background: rgba(255,255,255,0.03);
+  color: var(--text-primary);
+  border: 1px solid rgba(255,255,255,0.06);
+}
+
+[data-theme="dark"] .details-toggle:hover,
+[data-theme="dark"] .details-toggle:focus {
+  background: var(--accent-primary);
+  color: #ffffff;
+  border-color: var(--accent-primary);
 }
 
 /* Spinner animations */
