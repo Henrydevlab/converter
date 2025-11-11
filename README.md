@@ -2,8 +2,6 @@
 
 A modern, responsive currency converter web app built with plain **HTML**, **CSS**, and **JavaScript**. The app fetches exchange rates from a public API and includes progressive enhancements so it remains usable offline and on slow networks.
 
-This README was updated to reflect recent enhancements: loading states, improved validation, caching and offline fallbacks, conversion history, a theme toggle, PWA support, and a non-cluttering details panel that shows raw rates and timestamps.
-
 ## 🚀 Key Features (complete)
 
 - Live exchange rates fetched from ExchangeRate API (or any compatible provider).
@@ -22,13 +20,25 @@ This README was updated to reflect recent enhancements: loading states, improved
 - Accessibility improvements: ARIA attributes, keyboard focus, contrast/hovers for the Details button in both themes.
 - UX polish: first-time users see the Details panel auto-open once (persisted); the Details button has a brief hint animation to improve discovery.
 
+## 📸 Preview
+
+**Main UI** (converted amount shown prominently):
+
+![Main result preview - shows converted amount](preview.png)
+
+**Details panel** (showing original amount, raw rate, source, and timestamp):
+
+![Details panel preview - collapsible details with raw rate](screenshots/details.png)
+
+> _Add images to `preview.png` and `screenshots/details.png` folder in the repo root._
+
 ## 🧭 How the UI behaves
 
 - The main result area shows only the converted amount (clean, uncluttered).
 - Click the `Details` button to reveal the original amount, the raw rate (6 decimals), source label, and fetch timestamp.
 - On the very first conversion the Details panel auto-expands briefly to show users where to find extra info; this is remembered so it won't auto-open again.
 
-## � Developer notes & caching
+## 🛠 Developer notes & caching
 
 - Service Worker (service-worker.js) caches static assets and API responses. To force clients to pick up the latest CSS/JS I added cache-busting query parameters to `index.html` (e.g., `script.js?v=3`).
 - If you see an older UI, do a hard reload or unregister the service worker in DevTools (Application → Service Workers → Unregister) and reload the page.
@@ -67,21 +77,24 @@ This README was updated to reflect recent enhancements: loading states, improved
 - `service-worker.js` — PWA service worker that caches static assets and API responses (cache names bumped to v2).
 - `manifest.json` — PWA metadata for installability.
 
-## 🎯 Recent commits (high level)
+## ⚙️ API Used
 
-- feat: details toggle with raw rate & timestamp; add details styles and input handling improvements
-- ux: make Details discoverable — styled toggle, hint animation, auto-open on first conversion (persisted)
+Exchange Rate API  
+🔗 [https://api.exchangerate-api.com/v4/latest/USD](https://api.exchangerate-api.com/v4/latest/USD)
+
+> _Note:_ You can replace this with any other public exchange rate API (like [exchangerate.host](https://exchangerate.host)) if you prefer.
+
+## 🎯 Recent commits (summary)
+
+- feat: details toggle with raw rate & timestamp; add details styles
+- ux: make Details discoverable — styled toggle, hint animation, auto-open on first conversion
 - fix(pwa): bump service worker cache names to force update (v2)
 - chore: cache-bust CSS/JS includes to force clients to load updated UI
 - ui: show only converted amount; move original amount into details panel
 - style: improve Details button contrast and hover/focus for light & dark themes
 
-## 🔮 Next improvements (optional)
+## 🔮 Future improvements (optional)
 
 - Add a user setting to choose decimal precision for the main display (2 / 4 / 6).
 - Provide an option to pin details open by default.
 - Add unit/integration tests for critical logic (formatting, caching TTL, history fallback).
-
----
-
-If you'd like, I can also update this README with example screenshots, a short GIF of the Details auto-open behavior, or step-by-step screenshots for the offline test.
