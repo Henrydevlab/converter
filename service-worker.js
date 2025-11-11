@@ -1,9 +1,11 @@
 const CACHE_NAME = 'currency-converter-v1';
+const API_CACHE_NAME = 'currency-converter-api-v1';
 const urlsToCache = [
   '/',
   '/index.html',
   '/style.css',
   '/script.js',
+  '/manifest.json',
   'https://fonts.googleapis.com/css?family=Poppins:100,100italic,200,200italic,300,300italic,regular,italic,500,500italic,600,600italic,700,700italic,800,800italic,900,900italic'
 ];
 
@@ -54,15 +56,28 @@ self.addEventListener('fetch', event => {
       fetch(event.request)
         .then(response => {
           // Clone the response before caching
-          const responseToCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
+          if (response.ok) {
+            const responseToCache = response.clone();
+            caches.open(API_CACHE_NAME).then(cache => {
+              cache.put(event.request, responseToCache);
+            });
+          }
           return response;
         })
         .catch(error => {
           console.log('API fetch failed, trying cache:', error);
-          return caches.match(event.request);
+          return caches.match(event.request)
+            .then(response => {
+              if (response) {
+                return response;
+              }
+              // Return a cached error response
+              throw new Error('No cached API response available');
+            })
+            .catch(err => {
+              console.error('No cache available:', err);
+              throw err;
+            });
         })
     );
     return;
@@ -95,7 +110,6 @@ self.addEventListener('fetch', event => {
           })
           .catch(error => {
             console.error('Fetch failed:', error);
-            // You could return a custom offline page here
             throw error;
           });
       })

@@ -410,8 +410,24 @@ async function convertCurrency(e) {
                 updateCacheStatus('Offline - Using cached rates', true);
             }
         } else if (!isOnline) {
-            showError('No cached rates available for this currency pair. Please reconnect to the internet.');
-            return;
+            // Try to find conversion in history when offline
+            let foundInHistory = false;
+            const history = getHistory();
+            
+            for (let item of history) {
+                if (item.fromCurrency === fromCurrencyValue && item.toCurrency === toCurrencyValue) {
+                    rate = item.result / item.amount;
+                    foundInHistory = true;
+                    console.log('Using conversion rate from history');
+                    updateCacheStatus('Offline - Using rate from history', true);
+                    break;
+                }
+            }
+            
+            if (!foundInHistory) {
+                showError('No cached rates available. Make a conversion while online first, or reconnect to the internet.');
+                return;
+            }
         } else {
             try {
                 // Fetch fresh rates if not in cache and we're online
