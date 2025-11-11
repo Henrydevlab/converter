@@ -8,6 +8,19 @@ const errorMessage = document.getElementById("error-message");
 const cacheStatus = document.getElementById("cache-status");
 const cacheMessage = document.getElementById("cache-message");
 
+// Register Service Worker for offline support
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(registration => {
+        console.log('Service Worker registered successfully:', registration);
+      })
+      .catch(error => {
+        console.error('Service Worker registration failed:', error);
+      });
+  });
+}
+
 // Cache configuration
 const CACHE_KEY = 'exchangeRateCache';
 const CACHE_DURATION = 1000 * 60 * 30; // 30 minutes
@@ -183,12 +196,16 @@ document.getElementById('clear-history').addEventListener('click', clearHistory)
 // Network status handling
 window.addEventListener('online', function() {
     isOnline = true;
+    const offlineIndicator = document.getElementById('offline-indicator');
+    offlineIndicator.classList.add('hidden');
     updateCacheStatus('Online mode');
     cacheStatus.classList.remove('offline');
 });
 
 window.addEventListener('offline', function() {
     isOnline = false;
+    const offlineIndicator = document.getElementById('offline-indicator');
+    offlineIndicator.classList.remove('hidden');
     updateCacheStatus('Offline mode - Using cached rates');
     cacheStatus.classList.add('offline');
 });
