@@ -1,5 +1,6 @@
-const CACHE_NAME = 'currency-converter-v1';
-const API_CACHE_NAME = 'currency-converter-api-v1';
+// Bump cache names when updating assets to force browsers to fetch newer files
+const CACHE_NAME = 'currency-converter-v2';
+const API_CACHE_NAME = 'currency-converter-api-v2';
 const urlsToCache = [
   '/',
   '/index.html',
